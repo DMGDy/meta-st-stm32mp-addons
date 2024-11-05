@@ -1,0 +1,393 @@
+// SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-3-Clause)
+/*
+ * Copyright (C) 2024, STMicroelectronics - All Rights Reserved
+ * Author: STM32CubeMX code generation for STMicroelectronics.
+ */
+
+/* For more information on Device Tree configuration, please refer to
+ * https://wiki.st.com/stm32mpu/wiki/Category:Device_tree_configuration
+ */
+
+/dts-v1/;
+
+#include <dt-bindings/pinctrl/stm32-pinfunc.h>
+#include <dt-bindings/clock/stm32mp1-clksrc.h>
+#include <dt-bindings/soc/stm32mp15-etzpc.h>
+#include "stm32mp157.dtsi"
+#include "stm32mp15xf.dtsi"
+#include "stm33mp15xxac-pinctrl.dtsi"
+
+/* USER CODE BEGIN includes */
+#include "stm32mp15-pinctrl.dtsi"
+#include <dt-bindings/gpio/stm32mp_gpio.h>
+#include <dt-bindings/power/stm32mp1-power.h>
+#include <dt-bindings/mfd/st,stpmic1.h>
+//#include <dt-bindings/soc/stm32mp-provisioning.h>
+#include <dt-bindings/tamper/st,stm32-tamp.h>
+/* USER CODE END includes */
+
+/ {
+	model = "STMicroelectronics STM32MP157F-DK2 STM32CubeMX board - openstlinux-6.1-yocto-mickledore-mpu-v24.06.26";
+	compatible = "st,stm32mp157f-bstinputtesting-mx", "st,stm32mp157f-dk2", "st,stm32mp157";
+
+	/* !!! log : Warning - no DDR config found: 'memory' node not generated  !!! */
+
+	/*
+	memory@??? {
+		reg = < ??? >;
+	};
+	*/
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		/* USER CODE BEGIN reserved-memory */
+
+		mcusram1:mcuram@10000000{
+			compatible = "shared-dma-pool";
+			reg = <0x10000000 0x20000>;
+			no-map;
+		};
+
+		mcusram2:mcuram@10020000{
+			compatible = "shared-dma-pool";
+			reg = <0x10020000 0x20000>;
+			no-map;
+		};
+
+		mcusram3:mcuram@10040000{
+			compatible = "shared-dma-pool";
+			reg = <0x10040000 0x10000>;
+			no-map;
+		};
+
+		retram:retram@38000000{
+			compatible = "shared-dma-pool";
+			reg = <0x38000000 0x10000>;
+			no-map;
+		};
+
+		gpu_reserved:gpu@d4000000{
+			reg = <0xd4000000 0x4000000>;
+			no-map;
+		};
+		/* USER CODE END reserved-memory */
+	};
+
+	/* USER CODE BEGIN root */
+
+	aliases{
+		serial0 = &uart4;
+		serial1 = &usart3;
+		serial2 = &uart7;
+		serial3 = &usart2;
+	};
+
+	led{
+		compatible = "gpio-leds";
+
+		led-blue{
+			label = "heartbeat";
+			gpios = <&gpiod 11 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+			default-state = "off";
+		};
+	};
+
+	shadow-prov{
+		compatible = "st,provisioning";
+
+		hw2_prov{
+			nvmem-cells = <&hw2_otp>;
+			st,shadow-value = <0x000001E0>;
+			st,shadow-lock = <STICKY_LOCK_SR>;
+		};
+	};
+
+	vin:vin{
+		compatible = "regulator-fixed";
+		regulator-name = "vin";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+	};
+
+	chosen{
+		stdout-path = "serial0:115200n8";
+	};
+	/* USER CODE END root */
+
+	clocks {
+		/* USER CODE BEGIN clocks */
+		/* USER CODE END clocks */
+
+		clk_hsi: clk-hsi {
+			clock-frequency = <64000000>;
+
+			/* USER CODE BEGIN clk_hsi */
+			/* USER CODE END clk_hsi */
+		};
+		clk_lse: clk-lse {
+			status = "disabled";
+
+			/* USER CODE BEGIN clk_lse */
+			/* USER CODE END clk_lse */
+		};
+		clk_hse: clk-hse {
+			clock-frequency = <24000000>;
+
+			/* USER CODE BEGIN clk_hse */
+			/* USER CODE END clk_hse */
+		};
+	};
+
+}; /*root*/
+
+/*Warning: the configuration of the secured GPIOs should be added in (addons) User Section*/
+&pinctrl {
+	rcc_pins_mx: rcc_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('H', 0, ANALOG)>, /* RCC_OSC_IN */
+					 <STM32_PINMUX('H', 1, ANALOG)>; /* RCC_OSC_OUT */
+		};
+	};
+
+	/* USER CODE BEGIN pinctrl */
+
+	uart4_pins_mx: uart4_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('B', 2, AF8)>; /* UART4_RX */
+			bias-disable;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('G', 11, AF6)>; /* UART4_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+	};
+	/* USER CODE END pinctrl */
+};
+
+&pinctrl_z {
+	/* USER CODE BEGIN pinctrl_z */
+	/* USER CODE END pinctrl_z */
+};
+
+&bsec{
+	status = "okay";
+
+	/* USER CODE BEGIN bsec */
+
+	board_id:board_id@ec{
+		reg = <0xec 0x4>;
+		st,non-secure-otp;
+	};
+
+	huk_otp:huk-otp@f0{
+		reg = <0xf0 0x10>;
+	};
+	/* USER CODE END bsec */
+};
+
+&etzpc{
+	status = "okay";
+	st,decprot = <
+	/*"Non Secured" peripherals*/
+	DECPROT(STM32MP1_ETZPC_DMA1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_DMAMUX_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	/*"Secured" peripherals*/
+	DECPROT(STM32MP1_ETZPC_STGENC_ID, DECPROT_S_RW, DECPROT_UNLOCK)
+	/*"Mcu Isolation" peripherals*/
+	DECPROT(STM32MP1_ETZPC_ADC_ID, DECPROT_MCU_ISOLATION, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_DMA2_ID, DECPROT_MCU_ISOLATION, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_TIM3_ID, DECPROT_MCU_ISOLATION, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_TIM5_ID, DECPROT_MCU_ISOLATION, DECPROT_UNLOCK)
+
+	/*Restriction: following IDs are not managed  - please to use User-Section if needed:
+		  STM32MP1_ETZPC_SRAMx_ID  STM32MP1_ETZPC_RETRAM_ID  STM32MP1_ETZPC_BKPSRAM_ID*/
+
+	/* USER CODE BEGIN etzpc_decprot */
+		/*STM32CubeMX generates a basic and standard configuration for ETZPC.
+		Additional device configurations can be added here if needed.
+		"etzpc" node could be also overloaded in "addons" User-Section.*/
+	/* USER CODE END etzpc_decprot */
+	>;
+
+	/* USER CODE BEGIN etzpc */
+	/* USER CODE END etzpc */
+};
+
+&rcc{
+	pinctrl-names = "default";
+	pinctrl-0 = <&rcc_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN rcc */
+	/* USER CODE END rcc */
+
+	st,clksrc = <
+		CLK_CKPER_HSE
+		CLK_STGEN_HSE
+		CLK_ADC_CKPER
+		CLK_MPU_PLL1P
+		CLK_AXI_PLL2P
+		CLK_MCU_PLL3P
+		CLK_RTC_HSE
+		CLK_MCO1_DISABLED
+		CLK_MCO2_DISABLED
+	>;
+	st,clkdiv = <
+		DIV(DIV_MPU, 1)
+		DIV(DIV_AXI, 0)
+		DIV(DIV_MCU, 0)
+		DIV(DIV_APB1, 1)
+		DIV(DIV_APB2, 1)
+		DIV(DIV_APB3, 1)
+		DIV(DIV_APB4, 1)
+		DIV(DIV_APB5, 2)
+		DIV(DIV_RTC, 23)
+		DIV(DIV_MCO1, 0)
+		DIV(DIV_MCO2, 0)
+	>;
+	st,pll_vco {
+		pll2_vco_1066Mhz: pll2-vco-1066Mhz {
+			src = < CLK_PLL12_HSE >;
+			divmn = < 2 65 >;
+			frac = < 0x1400 >;
+		};
+		pll3_vco_450Mhz: pll3-vco-450Mhz {
+			src = < CLK_PLL3_HSI >;
+			divmn = < 3 27 >;
+			frac = < 0x400 >;
+		};
+		pll4_vco_96000000Mhz: pll4-vco-96000000Mhz {
+			src = < 0 >;
+			divmn = < 3 98 >;
+		};
+		/* USER CODE BEGIN rcc_st-pll_vco */
+		/* USER CODE END rcc_st-pll_vco */
+	};
+
+	pll2:st,pll@1 {
+		compatible = "st,stm32mp1-pll";
+		reg = <1>;
+
+		st,pll = < &pll2_cfg1 >;
+
+		pll2_cfg1: pll2_cfg1 {
+			st,pll_vco = < &pll2_vco_1066Mhz >;
+			st,pll_div_pqr = < 1 0 0 >;
+		};
+		/* USER CODE BEGIN pll2 */
+		/* USER CODE END pll2 */
+	};
+
+	pll3:st,pll@2 {
+		compatible = "st,stm32mp1-pll";
+		reg = <2>;
+
+		st,pll = < &pll3_cfg1 >;
+
+		pll3_cfg1: pll3_cfg1 {
+			st,pll_vco = < &pll3_vco_450Mhz >;
+			st,pll_div_pqr = < 4 1 36 >;
+		};
+		/* USER CODE BEGIN pll3 */
+		/* USER CODE END pll3 */
+	};
+
+	pll4:st,pll@3 {
+		compatible = "st,stm32mp1-pll";
+		reg = <3>;
+
+		st,pll = < &pll4_cfg1 >;
+
+		pll4_cfg1: pll4_cfg1 {
+			st,pll_vco = < &pll4_vco_96000000Mhz >;
+			st,pll_div_pqr = < 5 7 7 >;
+		};
+		/* USER CODE BEGIN pll4 */
+		/* USER CODE END pll4 */
+	};
+
+	/* USER CODE BEGIN rcc */
+	/* USER CODE END rcc */
+};
+
+&rtc{
+	status = "okay";
+
+	/* USER CODE BEGIN rtc */
+	/* USER CODE END rtc */
+};
+
+&tamp{
+	status = "okay";
+
+	/* USER CODE BEGIN tamp */
+	st,backup-zones = <10 5 17>;
+	st,tamp-passive-nb-sample = <4>;
+	st,tamp-passive-sample-clk-div = <16384>;
+	/* USER CODE END tamp */
+};
+
+/* USER CODE BEGIN addons */
+
+&gpu{
+	contiguous-area = <&gpu_reserved>;
+};
+
+&cpu0{
+	cpu-supply = <&vddcore>;
+};
+
+&cpu1{
+	cpu-supply = <&vddcore>;
+};
+
+&osc_calibration{
+
+	csi-calibration{
+		status = "okay";
+	};
+
+	hsi-calibration{
+		status = "okay";
+	};
+};
+
+&usbphyc_port0{
+	phy-supply = <&vdd_usb>;
+	st,tune-hs-dc-level = <2>;
+	st,enable-fs-rftime-tuning;
+	st,enable-hs-rftime-reduction;
+	st,trim-hs-current = <15>;
+	st,trim-hs-impedance = <1>;
+	st,tune-squelch-level = <3>;
+	st,tune-hs-rx-offset = <2>;
+	st,no-lsfs-sc;
+};
+
+&usbphyc_port1{
+	phy-supply = <&vdd_usb>;
+	st,tune-hs-dc-level = <2>;
+	st,enable-fs-rftime-tuning;
+	st,enable-hs-rftime-reduction;
+	st,trim-hs-current = <15>;
+	st,trim-hs-impedance = <1>;
+	st,tune-squelch-level = <3>;
+	st,tune-hs-rx-offset = <2>;
+	st,no-lsfs-sc;
+};
+
+
+&uart4{
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart4_pins_mx>;
+	status = "okay";
+};
+/* USER CODE END addons */
+
